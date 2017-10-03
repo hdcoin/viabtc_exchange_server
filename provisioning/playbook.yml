@@ -1,0 +1,121 @@
+---
+- hosts: all
+  vars:
+    kafka: kafka_2.11-0.11.0.1
+  become: true
+  gather_facts: False
+  pre_tasks:
+    # Ansible requires python2, which is not installed by default on Ubuntu Xenial
+    - raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+    # action: setup will gather facts after python2 has been installed
+    - action: setup
+  tasks:
+    - name: add java repo
+      apt_repository: repo="ppa:webupd8team/java"
+
+    - name: accept java8 license
+      debconf: name=oracle-java8-installer question=shared/accepted-oracle-license-v1-1 value=true vtype=select
+
+    - name: install java8
+      apt: name={{item}} state=latest
+      with_items:
+        - oracle-java8-installer
+        - ca-certificates
+        - oracle-java8-set-default
+
+    - name: install zookeeper
+      apt: pkg=zookeeperd state=present
+
+    - name: download kafka
+      get_url:
+        url: http://www-us.apache.org/dist/kafka/0.11.0.1/{{kafka}}.tgz
+        dest: /tmp/{{kafka}}.tgz
+        checksum: sha256:0da77e1e542cf097d6025309bc996c10ceda394839c041934b86d8729ab574f1
+
+    - name: create kafka directory
+      file:
+        path: /opt/kafka
+        state: directory
+
+    - name: extract kafka .tgz into /opt/kafka
+      unarchive:
+        copy: no
+        src: /tmp/{{kafka}}.tgz
+        dest: /opt/kafka
+        
+    - name: start kafka
+      shell: nohup /opt/kafka/{{kafka}}/bin/kafka-server-start.sh /opt/kafka/{{kafka}}/config/server.properties /tmp/kafka.log 2>&1 &
+
+    - name: install libev, libmpdec, libjansson, libmysqlclient
+      apt: pkg={{item}} state=present
+      with_items:
+        - build-essential
+        - libev-dev
+        - libmpdec-dev
+        - libjansson-dev 
+        - libmysqlclient-dev 
+
+    # ubuntu does not have a recent enough version of librdkafka
+    - name: download librdkafka
+      get_url: url=https://github.com/edenhill/librdkafka/archive/v0.11.0.tar.gz dest=/tmp/v0.11.0.tar.gz checksum=sha256:d4baf9a0d08767128913bb4e39d68995a95d7efa834fcf3e4f60c3156003b887
+
+    - name: create librdkafka directory
+      file:
+        path: /opt/librdkafka
+        state: directory
+
+    - name: extract librdkafka .tar.gz into /opt/librdkafka
+      unarchive:
+        copy: no
+        src: /tmp/v0.11.0.tar.gz
+        dest: /opt/librdkafka
+
+    - name: make & install librdkafka
+      shell: cd /opt/librdkafka/librdkafka-0.11.0 && ./configure && make && make install
+      args:
+        creates: /usr/local/lib/librdkafka.so
+
+    # make our own curl so we can reduce the amount of static lib dependencies needed
+    - name: download libcurl
+      get_url: url=https://curl.haxx.se/download/curl-7.55.1.tar.gz dest=/tmp/curl-7.55.1.tar.gz checksum=sha256:09576ea5e66672648d83dce3af16d0cb294d4cba2b5d166ade39655c495f4a20
+
+    - name: create curl directory
+      file:
+        path: /opt/curl
+        state: directory
+
+    - name: extract curl .tar.gz into /opt/curl
+      unarchive:
+        copy: no
+        src: /tmp/curl-7.55.1.tar.gz
+        dest: /opt/curl
+
+    - name: make & install libcurl
+      shell: cd /opt/curl/curl-7.55.1 && ./configure --without-ssl && make && make install
+      args:
+        creates: /usr/local/lib/libcurl.so
+        
+    #https://github.com/nodejs/http-parser
+    #- name: install http_parser
+      #apt: pkg=http_parser state=present
+
+    - name: make network & utils
+      make:
+        chdir: "{{ item.dir }}"
+        target: "{{ item.target }}"
+      with_items:
+        - { dir: '/vagrant/depends/hiredis', target: 'install' }
+        - { dir: '/vagrant/network', target: 'all' }
+        - { dir: '/vagrant/utils', target: 'all' }
+
+    - name: make matchengine, marketprice, alertcenter, readhistory, accesshttp, accwsswshave 
+      make:
+        chdir: "{{ item.dir }}"
+        target: "{{ item.target }}"
+      with_items:
+        - { dir: '/vagrant/matchengine', target: 'all' }
+        - { dir: '/vagrant/marketprice', target: 'all' }
+        - { dir: '/vagrant/alertcenter', target: 'all' }
+        - { dir: '/vagrant/readhistory', target: 'all' }
+        - { dir: '/vagrant/accesshttp', target: 'all' }
+        - { dir: '/vagrant/accessws', target: 'all' }
