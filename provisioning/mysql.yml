@@ -1,0 +1,23 @@
+---
+- hosts: all
+  become: true
+  gather_facts: False
+  pre_tasks:
+    # Ansible requires python2, which is not installed by default on Ubuntu Xenial
+    - raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+    # action: setup will gather facts after python2 has been installed
+    - action: setup
+  tasks:
+
+   - name: install the mysql packages
+     apt: name={{ item }} state=installed update_cache=yes
+     with_items:
+       - mysql-server
+       - mysql-client
+       - python-mysqldb
+
+   - name: create database user
+     mysql_user: user={{mysql_user}} password={{mysql_pass}} priv=*.*:ALL state=present
+
+   - name: create database
+     mysql_db: db={{mysql_db}} state=present

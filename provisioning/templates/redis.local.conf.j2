@@ -1,0 +1,7 @@
+port {{ redis_port }}
+
+{% if redis_pass %}
+
+requirepass {{ redis_pass }}
+
+{% endif %}
