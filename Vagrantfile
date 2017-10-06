@@ -5,19 +5,25 @@ Vagrant.configure(2) do |config|
 
   config.vm.box = "bento/ubuntu-16.04"
 
+  MYSQL_HOST = "10.50.1.2"
+  REDIS_HOST = "10.50.1.3"
+  KAFKA_HOST = "10.50.1.4"
+  MATCH_HOST = "10.50.1.4"
+
   MYSQL_USER = "viaxch"
   MYSQL_PASS = "not_production"
-  MYSQL_DB = "viaxch"
   REDIS_PASS = "not_production"
 
   config.vm.define "mysql" do |mysql|
+      mysql.vm.network "private_network", ip: MYSQL_HOST
       mysql.vm.provision :ansible do |ansible|
         ansible.playbook = "provisioning/mysql.yml"
-        ansible.extra_vars = { root_dir: "/vagrant", mysql_user: MYSQL_USER, mysql_pass: MYSQL_PASS, mysql_db: MYSQL_DB }
+        ansible.extra_vars = { root_dir: "/vagrant", mysql_user: MYSQL_USER, mysql_pass: MYSQL_PASS, mysql_user_host: MATCH_HOST }
       end
   end
 
   config.vm.define "redis" do |redis|
+      redis.vm.network "private_network", ip: REDIS_HOST
       redis.vm.provision :ansible do |ansible|
         ansible.playbook = "provisioning/redis.yml"
         ansible.extra_vars = { root_dir: "/vagrant", redis_pass: REDIS_PASS}
@@ -31,10 +37,11 @@ Vagrant.configure(2) do |config|
       end
   end
 
-  config.vm.define "blah" do |blah|
-    blah.vm.provision :ansible do |ansible|
-      ansible.playbook = "provisioning/playbook.yml"
-      ansible.extra_vars = { root_dir: "/vagrant" }
-    end
+  config.vm.define "match_svr" do |match_svr|
+      match_svr.vm.network "private_network", ip: MATCH_HOST
+      match_svr.vm.provision :ansible do |ansible|
+        ansible.playbook = "provisioning/match_svr.yml"
+        ansible.extra_vars = { root_dir: "/vagrant", mysql_user: MYSQL_USER, mysql_pass: MYSQL_PASS, mysql_host: MYSQL_HOST }
+      end
   end
 end

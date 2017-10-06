@@ -17,7 +17,19 @@
        - python-mysqldb
 
    - name: create database user
-     mysql_user: user={{mysql_user}} password={{mysql_pass}} priv=*.*:ALL state=present
+     mysql_user: user={{mysql_user}} password={{mysql_pass}} host={{mysql_user_host}} priv=*.*:ALL state=present
 
-   - name: create database
-     mysql_db: db={{mysql_db}} state=present
+   - name: create trade_log database
+     mysql_db: db=trade_log state=present
+
+   - name: create trade_history database
+     mysql_db: db=trade_history state=present
+
+   - name: set bind address
+     lineinfile:
+         dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+         regexp: '^bind-address            = 127.0.0.1'
+         line: 'bind-address            = 0.0.0.0'
+
+   - name: restart mysql
+     service: name=mysql state=restarted
