@@ -9,7 +9,7 @@
     - action: setup
   tasks:
 
-      #- include: build_viaxch.yml
+    - include: build_viaxch.yml
 
     - name: create log directory
       file: path=/var/log/trade/ state=directory
@@ -17,8 +17,6 @@
     # using named groups due to ansible munging backrefs next to numbers (http://www.handverdrahtet.org/2016/01/ansible-using-numbered-backreference.html)
     - name:
       shell: perl -i -p0e 's/{{ item.regexp }}/{{ item.replace }}/s' {{root_dir}}/matchengine/config.json
-      #shell: echo 's/{{ item.regexp }}/{{ item.replace }}/s'
-      register: out
       with_items:
           - { regexp: '(?<one>"db_log": \{[^\{]*"host": ")(localhost)(?<three>",)',
               replace: '$+{one}{{mysql_host}}$+{three}' }

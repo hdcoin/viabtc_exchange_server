@@ -19,11 +19,8 @@
    - name: create database user
      mysql_user: user={{mysql_user}} password={{mysql_pass}} host={{mysql_user_host}} priv=*.*:ALL state=present
 
-   - name: create trade_log database
-     mysql_db: db=trade_log state=present
-
-   - name: create trade_history database
-     mysql_db: db=trade_history state=present
+   - name: create database user
+     mysql_user: user={{mysql_user}} password={{mysql_pass}} host=localhost priv=*.*:ALL state=present
 
    - name: set bind address
      lineinfile:
@@ -33,3 +30,29 @@
 
    - name: restart mysql
      service: name=mysql state=restarted
+
+   - name: create databases
+     mysql_db: db={{ item.dbname }} state=present
+     with_items:
+         - { dbname: 'trade_log' }
+         - { dbname: 'trade_history' }
+
+   # not idempotent :(
+   - name: create tables
+     shell: mysql -u {{ mysql_user }} -p{{ mysql_pass }} {{ item.dbname }} < {{ root_dir }}/sql/{{ item.file }}
+     with_items:
+         - { dbname: 'trade_log', file: 'create_trade_log.sql' }
+         - { dbname: 'trade_history', file: 'create_trade_history.sql' }
+
+   - name: set user/pass in init_trade_history.sh
+     lineinfile:
+         dest: '{{ root_dir }}/sql/init_trade_history.sh'
+         regexp: '{{ item.regexp }}'
+         line: '{{ item.line }}'
+     with_items:
+         - { regexp: '^MYSQL_USER="root"', line: 'MYSQL_USER="{{ mysql_user }}"' }
+         - { regexp: '^MYSQL_PASS="shit"', line: 'MYSQL_PASS="{{ mysql_pass }}"' }
+
+   # not idempotent :(
+   - name: init trade history
+     shell: /bin/sh {{ root_dir }}/sql/init_trade_history.sh
