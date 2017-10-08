@@ -2,6 +2,7 @@
 - hosts: all
   vars:
     redis_port: 6379
+    sentinel_port: 26381
   become: true
   gather_facts: False
   pre_tasks:
@@ -15,15 +16,33 @@
      apt: name={{ item }} state=installed update_cache=yes
      with_items:
        - redis-server
+       - redis-sentinel
        - redis-tools
 
    - name: add redis.local.conf template
      template: src=templates/redis.local.conf.j2 dest=/etc/redis/redis.local.conf group=redis owner=redis
+
+   - name: add sentinel.local.conf template
+     template: src=templates/sentinel.local.conf.j2 dest=/etc/redis/sentinel.local.conf group=redis owner=redis
 
    - name: add redis.local.conf include to redis.conf
      lineinfile:
        dest: /etc/redis/redis.conf
        line: 'include /etc/redis/redis.local.conf'
 
+   - name: replace sentinel.conf monitor conf
+     replace:
+       dest: /etc/redis/sentinel.conf
+       regexp: '^sentinel monitor mymaster 127.0.0.1 6379 2'
+       replace: 'sentinel monitor mymaster {{ redis_host }} {{ redis_port }} 1'
+
+   - name: add sentinel.local.conf include to sentinel.conf
+     lineinfile:
+       dest: /etc/redis/sentinel.conf
+       line: 'include /etc/redis/sentinel.local.conf'
+
    - name: restart redis
      service: name=redis state=restarted
+
+   - name: restart redis sentinel
+     service: name=redis-sentinel state=restarted

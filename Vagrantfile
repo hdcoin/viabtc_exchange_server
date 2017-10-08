@@ -26,7 +26,7 @@ Vagrant.configure(2) do |config|
       redis.vm.network "private_network", ip: REDIS_HOST
       redis.vm.provision :ansible do |ansible|
         ansible.playbook = "provisioning/redis.yml"
-        ansible.extra_vars = { root_dir: "/vagrant", redis_pass: REDIS_PASS}
+        ansible.extra_vars = { root_dir: "/vagrant", redis_pass: REDIS_PASS, redis_host: REDIS_HOST}
       end
   end
 
@@ -42,6 +42,14 @@ Vagrant.configure(2) do |config|
       match_svr.vm.provision :ansible do |ansible|
         ansible.playbook = "provisioning/match_svr.yml"
         ansible.extra_vars = { root_dir: "/vagrant", mysql_user: MYSQL_USER, mysql_pass: MYSQL_PASS, mysql_host: MYSQL_HOST }
+      end
+  end
+
+  config.vm.define "price_svr" do |price_svr|
+      price_svr.vm.network "private_network", ip: MATCH_HOST
+      price_svr.vm.provision :ansible do |ansible|
+        ansible.playbook = "provisioning/price_svr.yml"
+        ansible.extra_vars = { root_dir: "/vagrant", redis_host: REDIS_HOST }
       end
   end
 end
