@@ -1,6 +1,6 @@
 ---
 
-- name: install libev, libmpdec, libjansson, libmysqlclient
+- name: install libev, libmpdec, libjansson, libmysqlclient, libssl
   apt: pkg={{item}} state=present
   with_items:
     - build-essential
@@ -8,6 +8,7 @@
     - libmpdec-dev
     - libjansson-dev 
     - libmysqlclient-dev 
+    - libssl-dev
 
 # ubuntu does not have a recent enough version of librdkafka
 - name: download librdkafka

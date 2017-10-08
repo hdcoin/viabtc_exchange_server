@@ -18,6 +18,8 @@
     - name:
       shell: perl -i -p0e 's/{{ item.regexp }}/{{ item.replace }}/s' {{root_dir}}/marketprice/config.json
       with_items:
+          - { regexp: '(?<one>"deals": \{[^\{]*"brokers": ")(127.0.0.1)(?<three>:9092",)',
+              replace: '$+{one}{{kafka_host}}$+{three}' }
           - { regexp: '(?<one>"redis": \{[^\{]*"addr": \[[^\{]*")(127.0.0.1)(?<three>:26381",)',
               replace: '$+{one}{{redis_host}}$+{three}' }
           - { regexp: '(?<one>"redis": \{[^\{]*"addr": \[[^\{]*")(127.0.0.1)(?<three>:26382",)',

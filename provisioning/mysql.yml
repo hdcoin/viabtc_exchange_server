@@ -22,6 +22,9 @@
    - name: create database user
      mysql_user: user={{mysql_user}} password={{mysql_pass}} host=localhost priv=*.*:ALL state=present
 
+   - name: create database user
+     mysql_user: user={{mysql_user}} password={{mysql_pass}} host={{admin_host}} priv=*.*:ALL state=present
+
    - name: set bind address
      lineinfile:
          dest: /etc/mysql/mysql.conf.d/mysqld.cnf
