@@ -16,13 +16,16 @@
        - mysql-client
        - python-mysqldb
 
-   - name: create database user
-     mysql_user: user={{mysql_user}} password={{mysql_pass}} host={{mysql_user_host}} priv=*.*:ALL state=present
+   - name: create database user (match)
+     mysql_user: user={{mysql_user}} password={{mysql_pass}} host={{mysql_user_match_host}} priv=*.*:ALL state=present
+   - name: create database user (data)
+     mysql_user: user={{mysql_user}} password={{mysql_pass}} host={{mysql_user_data_host}} priv=*.*:ALL state=present
 
-   - name: create database user
+
+   - name: create database user (local)
      mysql_user: user={{mysql_user}} password={{mysql_pass}} host=localhost priv=*.*:ALL state=present
 
-   - name: create database user
+   - name: create database user (admin)
      mysql_user: user={{mysql_user}} password={{mysql_pass}} host={{admin_host}} priv=*.*:ALL state=present
 
    - name: set bind address
