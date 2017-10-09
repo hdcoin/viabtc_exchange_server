@@ -63,4 +63,12 @@ Vagrant.configure(2) do |config|
         ansible.extra_vars = { root_dir: "/vagrant", mysql_user: MYSQL_USER, mysql_pass: MYSQL_PASS, mysql_host: MYSQL_HOST }
       end
   end
+
+  config.vm.define "http_svr" do |http_svr|
+      http_svr.vm.network "private_network", ip: DATA_HOST
+      http_svr.vm.provision :ansible do |ansible|
+        ansible.playbook = "provisioning/http_svr.yml"
+        ansible.extra_vars = { root_dir: "/vagrant", match_host: MATCH_HOST, price_host: PRICE_HOST, data_host: DATA_HOST }
+      end
+  end
 end
