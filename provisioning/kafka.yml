@@ -44,5 +44,12 @@
         src: /tmp/{{kafka}}.tgz
         dest: /opt/kafka
         
+    - name: install kafka systemd service
+      template: src=templates/kafka.j2 dest=/etc/systemd/system/kafka.service
+      
+    - name: stop kafka
+      systemd: state=stopped name=kafka
+      ignore_errors: yes      
+
     - name: start kafka
-      shell: nohup /opt/kafka/{{kafka}}/bin/kafka-server-start.sh /opt/kafka/{{kafka}}/config/server.properties /tmp/kafka.log 2>&1 &
+      systemd: state=started enabled=yes name=kafka daemon_reload=yes

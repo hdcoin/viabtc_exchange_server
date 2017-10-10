@@ -1,0 +1,19 @@
+[Unit]
+Description=Kafka broker
+After=network.target
+
+[Service]
+Type=forking
+SyslogIdentifier=kafka
+ExecStart=/opt/kafka/{{kafka}}/bin/kafka-server-start.sh -daemon /opt/kafka/{{kafka}}/config/server.properties
+ExecStop=/opt/kafka/{{kafka}}/bin/kafka-server-stop.sh
+
+Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=10s
+StartLimitInterval=120s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target
