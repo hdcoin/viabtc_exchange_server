@@ -43,12 +43,16 @@
          - { dbname: 'trade_log' }
          - { dbname: 'trade_history' }
 
-   # not idempotent :(
    - name: create tables
      shell: mysql -u {{ mysql_user }} -p{{ mysql_pass }} {{ item.dbname }} < {{ root_dir }}/sql/{{ item.file }}
+     args:
+       creates: /etc/mysql/tables_created
      with_items:
          - { dbname: 'trade_log', file: 'create_trade_log.sql' }
          - { dbname: 'trade_history', file: 'create_trade_history.sql' }
+
+   # create evidence that previous step executed correctly
+   - shell: touch /etc/mysql/tables_created
 
    - name: set user/pass in init_trade_history.sh
      lineinfile:
@@ -59,6 +63,10 @@
          - { regexp: '^MYSQL_USER="root"', line: 'MYSQL_USER="{{ mysql_user }}"' }
          - { regexp: '^MYSQL_PASS="shit"', line: 'MYSQL_PASS="{{ mysql_pass }}"' }
 
-   # not idempotent :(
    - name: init trade history
      shell: /bin/sh {{ root_dir }}/sql/init_trade_history.sh
+     args:
+       creates: /etc/mysql/trade_history_initialised
+
+   # create evidence that previous step executed correctly
+   - shell: touch /etc/mysql/trade_history_initialised
