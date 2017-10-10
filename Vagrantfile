@@ -9,9 +9,10 @@ Vagrant.configure(2) do |config|
   MYSQL_HOST = "10.50.1.2"
   REDIS_HOST = "10.50.1.3"
   KAFKA_HOST = "10.50.1.4"
-  MATCH_HOST = "10.50.1.4"
-  PRICE_HOST = "10.50.1.5"
-  DATA_HOST  = "10.50.1.6"
+  MATCH_HOST = "10.50.1.5"
+  PRICE_HOST = "10.50.1.6"
+  DATA_HOST  = "10.50.1.7"
+  HTTP_HOST  = "10.50.1.8"
 
   MYSQL_USER = "viaxch"
   MYSQL_PASS = "not_production"
@@ -65,7 +66,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define "http_svr" do |http_svr|
-      http_svr.vm.network "private_network", ip: DATA_HOST
+      http_svr.vm.network "private_network", ip: HTTP_HOST
       http_svr.vm.provision :ansible do |ansible|
         ansible.playbook = "provisioning/http_svr.yml"
         ansible.extra_vars = { root_dir: "/vagrant", match_host: MATCH_HOST, price_host: PRICE_HOST, data_host: DATA_HOST }
