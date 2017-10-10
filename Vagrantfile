@@ -35,6 +35,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define "kafka" do |kafka|
+      kafka.vm.network "private_network", ip: KAFKA_HOST
       kafka.vm.provision :ansible do |ansible|
         ansible.playbook = "provisioning/kafka.yml"
         ansible.extra_vars = { root_dir: "/vagrant" }
