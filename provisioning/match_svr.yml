@@ -32,3 +32,6 @@
               replace: '$+{one}{{mysql_pass}}$+{three}' }
           - { regexp: '(?<one>"brokers": ")(127.0.0.1)(?<three>:9092",)',
               replace: '$+{one}{{kafka_host}}$+{three}' }
+
+    - name: restart server
+      shell: '{{root_dir}}/matchengine/matchengine.exe {{root_dir}}/matchengine/config.json'

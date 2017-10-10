@@ -24,3 +24,6 @@
               replace: '$+{one}{{mysql_user}}$+{three}' }
           - { regexp: '(?<one>"db_history": \{[^\{]*"pass": ")(shit)(?<three>",)',
               replace: '$+{one}{{mysql_pass}}$+{three}' }
+
+    - name: restart server
+      shell: '{{root_dir}}/readhistory/readhistory.exe {{root_dir}}/readhistory/config.json'
