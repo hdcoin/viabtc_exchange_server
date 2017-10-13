@@ -24,6 +24,8 @@
               replace: '$+{one}{{mysql_user}}$+{three}' }
           - { regexp: '(?<one>"db_history": \{[^\{]*"pass": ")(shit)(?<three>",)',
               replace: '$+{one}{{mysql_pass}}$+{three}' }
+          - { regexp: '(?<one>"alert": \{[^\{]*"addr": ")(127.0.0.1)(?<three>:4444")',
+              replace: '$+{one}{{alert_host}}$+{three}' }
 
     - name: restart server
       shell: '{{root_dir}}/readhistory/readhistory.exe {{root_dir}}/readhistory/config.json'

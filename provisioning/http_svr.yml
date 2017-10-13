@@ -24,6 +24,8 @@
               replace: '$+{one}{{price_host}}$+{three}' }
           - { regexp: '(?<one>"readhistory": \{[^\{]*"addr": \[[^\{]*"tcp@)(127.0.0.1)(?<three>:7424")',
               replace: '$+{one}{{data_host}}$+{three}' }
+          - { regexp: '(?<one>"alert": \{[^\{]*"addr": ")(127.0.0.1)(?<three>:4444")',
+              replace: '$+{one}{{alert_host}}$+{three}' }
 
     - name: restart server
       shell: '{{root_dir}}/accesshttp/accesshttp.exe {{root_dir}}/accesshttp/config.json'

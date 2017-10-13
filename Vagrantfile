@@ -17,7 +17,7 @@ Vagrant.configure(2) do |config|
 
   VM_HOST    = "10.50.1.1"
   if combine_servers
-      COMBINE_HOST = MYSQL_HOST = REDIS_HOST = KAFKA_HOST = MATCH_HOST = PRICE_HOST = DATA_HOST = HTTP_HOST = WS_HOST = "10.50.1.2"
+      COMBINE_HOST = MYSQL_HOST = REDIS_HOST = KAFKA_HOST = MATCH_HOST = PRICE_HOST = DATA_HOST = HTTP_HOST = WS_HOST = ALERT_HOST = "10.50.1.2"
   else
       MYSQL_HOST = "10.50.1.2"
       REDIS_HOST = "10.50.1.3"
@@ -27,6 +27,7 @@ Vagrant.configure(2) do |config|
       DATA_HOST  = "10.50.1.7"
       HTTP_HOST  = "10.50.1.8"
       WS_HOST    = "10.50.1.9"
+      ALERT_HOST = "10.50.1.10"
   end
 
   MYSQL_USER = "viaxch"
@@ -35,15 +36,17 @@ Vagrant.configure(2) do |config|
 
   #TODO: frontend endpoint to validate can stream user events?
   AUTH_URL = "http://10.50.1.10:8000/internal/exchange/user/auth"
+  ALERT_EMAIL = "alert@example.com"
 
   mysql_vars = { root_dir: "/vagrant", mysql_user: MYSQL_USER, mysql_pass: MYSQL_PASS, mysql_user_match_host: MATCH_HOST, mysql_user_data_host: DATA_HOST, admin_host: VM_HOST }
   redis_vars = { root_dir: "/vagrant", redis_pass: REDIS_PASS, redis_host: REDIS_HOST}
   kafka_vars = { root_dir: "/vagrant" }
-  match_vars = { root_dir: "/vagrant", mysql_user: MYSQL_USER, mysql_pass: MYSQL_PASS, mysql_host: MYSQL_HOST, kafka_host: KAFKA_HOST }
-  price_vars = { root_dir: "/vagrant", redis_host: REDIS_HOST, kafka_host: KAFKA_HOST }
-  data_vars =  { root_dir: "/vagrant", mysql_user: MYSQL_USER, mysql_pass: MYSQL_PASS, mysql_host: MYSQL_HOST }
-  http_vars =  { root_dir: "/vagrant", match_host: MATCH_HOST, price_host: PRICE_HOST, data_host: DATA_HOST }
-  ws_vars =    { root_dir: "/vagrant", match_host: MATCH_HOST, price_host: PRICE_HOST, data_host: DATA_HOST, kafka_host: KAFKA_HOST, auth_url: AUTH_URL }
+  match_vars = { root_dir: "/vagrant", mysql_user: MYSQL_USER, mysql_pass: MYSQL_PASS, mysql_host: MYSQL_HOST, kafka_host: KAFKA_HOST, alert_host: ALERT_HOST }
+  price_vars = { root_dir: "/vagrant", redis_host: REDIS_HOST, kafka_host: KAFKA_HOST, alert_host: ALERT_HOST }
+  data_vars =  { root_dir: "/vagrant", mysql_user: MYSQL_USER, mysql_pass: MYSQL_PASS, mysql_host: MYSQL_HOST, alert_host: ALERT_HOST }
+  http_vars =  { root_dir: "/vagrant", match_host: MATCH_HOST, price_host: PRICE_HOST, data_host: DATA_HOST, alert_host: ALERT_HOST }
+  ws_vars =    { root_dir: "/vagrant", match_host: MATCH_HOST, price_host: PRICE_HOST, data_host: DATA_HOST, kafka_host: KAFKA_HOST, auth_url: AUTH_URL, alert_host: ALERT_HOST }
+  alert_vars =    { root_dir: "/vagrant", redis_host: REDIS_HOST, alert_email: ALERT_EMAIL }
 
   if combine_servers
       config.vm.define "main_svr" do |main_svr|
@@ -79,6 +82,10 @@ Vagrant.configure(2) do |config|
           main_svr.vm.provision "ws_svr", type: "ansible" do |ansible|
             ansible.playbook = "provisioning/ws_svr.yml"
             ansible.extra_vars = ws_vars
+          end
+          main_svr.vm.provision "alert_svr", type: "ansible" do |ansible|
+            ansible.playbook = "provisioning/alert_svr.yml"
+            ansible.extra_vars = alert_vars
           end
       end
   else
@@ -143,6 +150,14 @@ Vagrant.configure(2) do |config|
           ws_svr.vm.provision :ansible do |ansible|
             ansible.playbook = "provisioning/ws_svr.yml"
             ansible.extra_vars = ws_vars
+          end
+      end
+
+      config.vm.define "alert_svr" do |alert_svr|
+          alert_svr.vm.network "private_network", ip: ALERT_HOST
+          alert_svr.vm.provision :ansible do |ansible|
+            ansible.playbook = "provisioning/alert_svr.yml"
+            ansible.extra_vars = alert_vars
           end
       end
   end

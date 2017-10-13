@@ -32,6 +32,8 @@
               replace: '$+{one}{{kafka_host}}$+{three}' }
           - { regexp: '(?<one>"auth_url": ")([^"]*)(?<three>",)',
               replace: '$+{one}{{auth_url | regex_replace("/", "\/")}}$+{three}' }
+          - { regexp: '(?<one>"alert": \{[^\{]*"addr": ")(127.0.0.1)(?<three>:4444")',
+              replace: '$+{one}{{alert_host}}$+{three}' }
 
     - name: restart server
       shell: '{{root_dir}}/accessws/accessws.exe {{root_dir}}/accessws/config.json'

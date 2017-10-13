@@ -26,6 +26,8 @@
               replace: '$+{one}{{redis_host}}$+{three}' }
           - { regexp: '(?<one>"redis": \{[^\{]*"addr": \[[^\{]*")(127.0.0.1)(?<three>:26383")',
               replace: '$+{one}{{redis_host}}$+{three}' }
+          - { regexp: '(?<one>"alert": \{[^\{]*"addr": ")(127.0.0.1)(?<three>:4444")',
+              replace: '$+{one}{{alert_host}}$+{three}' }
 
     - name: restart server
       shell: '{{root_dir}}/marketprice/marketprice.exe {{root_dir}}/marketprice/config.json'

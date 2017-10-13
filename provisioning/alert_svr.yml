@@ -1,0 +1,51 @@
+---
+- hosts: all
+  become: true
+  gather_facts: False
+  pre_tasks:
+    # Ansible requires python2, which is not installed by default on Ubuntu Xenial
+    - raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+    # action: setup will gather facts after python2 has been installed
+    - action: setup
+  tasks:
+
+    - include: build_viaxch.yml
+
+    - name: create log directory
+      file: path=/var/log/trade/ state=directory
+
+    # using named groups due to ansible munging backrefs next to numbers (http://www.handverdrahtet.org/2016/01/ansible-using-numbered-backreference.html)
+    - name:
+      shell: perl -i -p0e 's/{{ item.regexp }}/{{ item.replace }}/s' {{root_dir}}/alertcenter/config.json
+      with_items:
+          - { regexp: '(?<one>"redis": \{[^\{]*"addr": \[[^\{]*")(127.0.0.1)(?<three>:26381",)',
+              replace: '$+{one}{{redis_host}}$+{three}' }
+          - { regexp: '(?<one>"redis": \{[^\{]*"addr": \[[^\{]*")(127.0.0.1)(?<three>:26382",)',
+              replace: '$+{one}{{redis_host}}$+{three}' }
+          - { regexp: '(?<one>"redis": \{[^\{]*"addr": \[[^\{]*")(127.0.0.1)(?<three>:26383")',
+              replace: '$+{one}{{redis_host}}$+{three}' }
+
+    - name: restart server
+      shell: '{{root_dir}}/alertcenter/alertcenter.exe {{root_dir}}/alertcenter/config.json'
+
+    - name: install python modules for send_alert.py
+      apt: pkg={{item}} state=present
+      with_items:
+        - python-boto3
+        - python-redis
+
+    # using named groups due to ansible munging backrefs next to numbers (http://www.handverdrahtet.org/2016/01/ansible-using-numbered-backreference.html)
+    - name:
+      shell: perl -i -p0e 's/{{ item.regexp }}/{{ item.replace }}/s' {{root_dir}}/alertcenter/send_alert.py
+      with_items:
+          - { regexp: '(?<one>\[.)(yang\@haipo.me)(?<three>.\])',
+              replace: '$+{one}{{alert_email | regex_replace("\@", "\\@")}}$+{three}' }
+          - { regexp: '(?<one>\(")(192.168.0.62)(?<three>", )',
+              replace: '$+{one}{{redis_host}}$+{three}' }
+          - { regexp: '(?<one>", )(26379)(?<three>\),)',
+              replace: '$+{one}{{26381}}$+{three}' }
+
+    #TODO: create service
+    - name: start alert emailer
+      shell: 'python {{root_dir}}/alertcenter/send_alert.py &'
+
