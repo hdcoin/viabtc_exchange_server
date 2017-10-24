@@ -35,5 +35,12 @@
           - { regexp: '(?<one>"alert": \{[^\{]*"addr": ")(127.0.0.1)(?<three>:4444")',
               replace: '$+{one}{{alert_host}}$+{three}' }
 
-    - name: restart server
-      shell: '{{root_dir}}/accessws/accessws.exe {{root_dir}}/accessws/config.json'
+    - name: install accessws systemd service
+      template: src=templates/accessws.j2 dest=/etc/systemd/system/accessws.service
+
+    - name: stop accessws
+      systemd: state=stopped name=accessws
+      ignore_errors: yes
+
+    - name: start accessws
+      systemd: state=started enabled=yes name=accessws daemon_reload=yes

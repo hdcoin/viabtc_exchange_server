@@ -35,5 +35,12 @@
           - { regexp: '(?<one>"alert": \{[^\{]*"addr": ")(127.0.0.1)(?<three>:4444")',
               replace: '$+{one}{{alert_host}}$+{three}' }
 
-    - name: restart server
-      shell: '{{root_dir}}/matchengine/matchengine.exe {{root_dir}}/matchengine/config.json'
+    - name: install matchengine systemd service
+      template: src=templates/matchengine.j2 dest=/etc/systemd/system/matchengine.service
+
+    - name: stop matchengine
+      systemd: state=stopped name=matchengine
+      ignore_errors: yes
+
+    - name: start matchengine
+      systemd: state=started enabled=yes name=matchengine daemon_reload=yes

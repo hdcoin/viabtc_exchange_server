@@ -1,0 +1,18 @@
+[Unit]
+Description=Alert center mailer
+After=network.target redis.service
+
+[Service]
+Type=simple
+SyslogIdentifier=alertcenter_mailer
+ExecStart=/usr/bin/python {{root_dir}}/alertcenter/send_alert.py
+
+Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=10s
+StartLimitInterval=120s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,18 @@
+[Unit]
+Description=Alert server
+After=network.target redis.service
+
+[Service]
+Type=forking
+SyslogIdentifier=alertcenter
+ExecStart={{root_dir}}/alertcenter/alertcenter.exe {{root_dir}}/alertcenter/config.json
+
+Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=10s
+StartLimitInterval=120s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

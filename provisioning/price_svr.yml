@@ -29,5 +29,12 @@
           - { regexp: '(?<one>"alert": \{[^\{]*"addr": ")(127.0.0.1)(?<three>:4444")',
               replace: '$+{one}{{alert_host}}$+{three}' }
 
-    - name: restart server
-      shell: '{{root_dir}}/marketprice/marketprice.exe {{root_dir}}/marketprice/config.json'
+    - name: install marketprice systemd service
+      template: src=templates/marketprice.j2 dest=/etc/systemd/system/marketprice.service
+
+    - name: stop marketprice
+      systemd: state=stopped name=marketprice
+      ignore_errors: yes
+
+    - name: start marketprice
+      systemd: state=started enabled=yes name=marketprice daemon_reload=yes

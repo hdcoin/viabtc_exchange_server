@@ -27,5 +27,12 @@
           - { regexp: '(?<one>"alert": \{[^\{]*"addr": ")(127.0.0.1)(?<three>:4444")',
               replace: '$+{one}{{alert_host}}$+{three}' }
 
-    - name: restart server
-      shell: '{{root_dir}}/readhistory/readhistory.exe {{root_dir}}/readhistory/config.json'
+    - name: install readhistory systemd service
+      template: src=templates/readhistory.j2 dest=/etc/systemd/system/readhistory.service
+
+    - name: stop readhistory
+      systemd: state=stopped name=readhistory
+      ignore_errors: yes
+
+    - name: start readhistory
+      systemd: state=started enabled=yes name=readhistory daemon_reload=yes

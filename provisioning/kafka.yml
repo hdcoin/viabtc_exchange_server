@@ -43,13 +43,13 @@
         copy: no
         src: /tmp/{{kafka}}.tgz
         dest: /opt/kafka
-        
+
     - name: install kafka systemd service
       template: src=templates/kafka.j2 dest=/etc/systemd/system/kafka.service
-      
+
     - name: stop kafka
       systemd: state=stopped name=kafka
-      ignore_errors: yes      
+      ignore_errors: yes
 
     - name: start kafka
       systemd: state=started enabled=yes name=kafka daemon_reload=yes

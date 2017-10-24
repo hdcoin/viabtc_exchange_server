@@ -27,5 +27,12 @@
           - { regexp: '(?<one>"alert": \{[^\{]*"addr": ")(127.0.0.1)(?<three>:4444")',
               replace: '$+{one}{{alert_host}}$+{three}' }
 
-    - name: restart server
-      shell: '{{root_dir}}/accesshttp/accesshttp.exe {{root_dir}}/accesshttp/config.json'
+    - name: install accesshttp systemd service
+      template: src=templates/accesshttp.j2 dest=/etc/systemd/system/accesshttp.service
+
+    - name: stop accesshttp
+      systemd: state=stopped name=accesshttp
+      ignore_errors: yes
+
+    - name: start accesshttp
+      systemd: state=started enabled=yes name=accesshttp daemon_reload=yes

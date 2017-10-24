@@ -45,7 +45,22 @@
           - { regexp: '(?<one>", )(26379)(?<three>\),)',
               replace: '$+{one}{{26381}}$+{three}' }
 
-    #TODO: create service
-    - name: start alert emailer
-      shell: 'python {{root_dir}}/alertcenter/send_alert.py &'
+    - name: install alertcenter_mailer systemd service
+      template: src=templates/alertcenter_mailer.j2 dest=/etc/systemd/system/alertcenter_mailer.service
 
+    - name: stop alertcenter_mailer
+      systemd: state=stopped name=alertcenter_mailer
+      ignore_errors: yes
+
+    - name: start alertcenter_mailer
+      systemd: state=started enabled=yes name=alertcenter_mailer daemon_reload=yes
+
+    - name: install alertcenter systemd service
+      template: src=templates/alertcenter.j2 dest=/etc/systemd/system/alertcenter.service
+
+    - name: stop alertcenter
+      systemd: state=stopped name=alertcenter
+      ignore_errors: yes
+
+    - name: start alertcenter
+      systemd: state=started enabled=yes name=alertcenter daemon_reload=yes

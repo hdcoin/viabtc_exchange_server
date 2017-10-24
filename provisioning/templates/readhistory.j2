@@ -1,0 +1,18 @@
+[Unit]
+Description=Read history
+After=network.target alertcenter.service mysql.service
+
+[Service]
+Type=forking
+SyslogIdentifier=readhistory
+ExecStart={{root_dir}}/readhistory/readhistory.exe {{root_dir}}/readhistory/config.json
+
+Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=10s
+StartLimitInterval=120s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target
