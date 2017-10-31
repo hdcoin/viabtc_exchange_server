@@ -34,6 +34,8 @@
               replace: '$+{one}{{auth_url | regex_replace("/", "\/")}}$+{three}' }
           - { regexp: '(?<one>"alert": \{[^\{]*"addr": ")(127.0.0.1)(?<three>:4444")',
               replace: '$+{one}{{alert_host}}$+{three}' }
+          - { regexp: '(?<one>"svr": \{[^\{]*"bind": \[[^\]]*")(stream@\/tmp\/accessws.sock)',
+              replace: '$+{one}tcp\@0.0.0.0:8090' }
 
     - name: install accessws systemd service
       template: src=templates/accessws.j2 dest=/etc/systemd/system/accessws.service
