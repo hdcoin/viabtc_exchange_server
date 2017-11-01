@@ -35,7 +35,7 @@ Vagrant.configure(2) do |config|
   REDIS_PASS = nil
 
   #TODO: frontend endpoint to validate can stream user events?
-  AUTH_URL = "http://10.50.1.10:8000/internal/exchange/user/auth"
+  AUTH_URL = "http://10.0.2.2:5000/Internal/WebsocketAuth"
   ALERT_EMAIL = "alert@example.com"
 
   mysql_vars = { root_dir: "/vagrant", mysql_user: MYSQL_USER, mysql_pass: MYSQL_PASS, mysql_user_match_host: MATCH_HOST, mysql_user_data_host: DATA_HOST, admin_host: VM_HOST }
