@@ -20,9 +20,9 @@
       with_items:
           - { regexp: '(?<one>"db_history": \{[^\{]*"host": ")(localhost)(?<three>",)',
               replace: '$+{one}{{mysql_host}}$+{three}' }
-          - { regexp: '(?<one>"db_history": \{[^\{]*"user": ")(root)(?<three>",)',
+          - { regexp: '(?<one>"db_history": \{[^\{]*"user": ")(user)(?<three>",)',
               replace: '$+{one}{{mysql_user}}$+{three}' }
-          - { regexp: '(?<one>"db_history": \{[^\{]*"pass": ")(shit)(?<three>",)',
+          - { regexp: '(?<one>"db_history": \{[^\{]*"pass": ")(pass)(?<three>",)',
               replace: '$+{one}{{mysql_pass}}$+{three}' }
           - { regexp: '(?<one>"alert": \{[^\{]*"addr": ")(127.0.0.1)(?<three>:4444")',
               replace: '$+{one}{{alert_host}}$+{three}' }

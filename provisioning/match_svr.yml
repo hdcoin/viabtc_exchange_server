@@ -20,15 +20,15 @@
       with_items:
           - { regexp: '(?<one>"db_log": \{[^\{]*"host": ")(localhost)(?<three>",)',
               replace: '$+{one}{{mysql_host}}$+{three}' }
-          - { regexp: '(?<one>"db_log": \{[^\{]*"user": ")(root)(?<three>",)',
+          - { regexp: '(?<one>"db_log": \{[^\{]*"user": ")(user)(?<three>",)',
               replace: '$+{one}{{mysql_user}}$+{three}' }
-          - { regexp: '(?<one>"db_log": \{[^\{]*"pass": ")(shit)(?<three>",)',
+          - { regexp: '(?<one>"db_log": \{[^\{]*"pass": ")(pass)(?<three>",)',
               replace: '$+{one}{{mysql_pass}}$+{three}' }
           - { regexp: '(?<one>"db_history": \{[^\{]*"host": ")(localhost)(?<three>",)',
               replace: '$+{one}{{mysql_host}}$+{three}' }
-          - { regexp: '(?<one>"db_history": \{[^\{]*"user": ")(root)(?<three>",)',
+          - { regexp: '(?<one>"db_history": \{[^\{]*"user": ")(user)(?<three>",)',
               replace: '$+{one}{{mysql_user}}$+{three}' }
-          - { regexp: '(?<one>"db_history": \{[^\{]*"pass": ")(shit)(?<three>",)',
+          - { regexp: '(?<one>"db_history": \{[^\{]*"pass": ")(pass)(?<three>",)',
               replace: '$+{one}{{mysql_pass}}$+{three}' }
           - { regexp: '(?<one>"brokers": ")(127.0.0.1)(?<three>:9092",)',
               replace: '$+{one}{{kafka_host}}$+{three}' }

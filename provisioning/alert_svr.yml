@@ -25,9 +25,6 @@
           - { regexp: '(?<one>"redis": \{[^\{]*"addr": \[[^\{]*")(127.0.0.1)(?<three>:26383")',
               replace: '$+{one}{{redis_host}}$+{three}' }
 
-    - name: restart server
-      shell: '{{root_dir}}/alertcenter/alertcenter.exe {{root_dir}}/alertcenter/config.json'
-
     - name: install python modules for send_alert.py
       apt: pkg={{item}} state=present
       with_items:
